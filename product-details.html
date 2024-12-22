@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details - ShopEasy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .product-image {
+            max-height: 400px;
+            object-fit: contain;
+        }
+        .quantity-input {
+            width: 70px;
+        }
+        .related-product-card {
+            transition: transform 0.2s;
+        }
+        .related-product-card:hover {
+            transform: translateY(-5px);
+        }
+        .cart-badge {
+            position: relative;
+            top: -10px;
+            right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation (same as index.html) -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">ShopEasy</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Products</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Contact</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-light position-relative" data-bs-toggle="modal" data-bs-target="#cartModal">
+                        🛒 Cart
+                        <span class="badge bg-danger cart-badge" id="cartCount">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Product Details Section -->
+    <div class="container py-5">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                <li class="breadcrumb-item"><a href="#">Products</a></li>
+                <li class="breadcrumb-item active" id="productBreadcrumb"></li>
+            </ol>
+        </nav>
+        
+        <div class="row" id="productDetails">
+            <!-- Product details will be dynamically added here -->
+        </div>
+
+        <!-- Related Products Section -->
+        <div class="mt-5">
+            <h3 class="mb-4">Related Products</h3>
+            <div class="row g-4" id="relatedProducts">
+                <!-- Related products will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Modal (same as index.html) -->
+    <div class="modal fade" id="cartModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Shopping Cart</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="cartItems">
+                        <!-- Cart items will be dynamically added here -->
+                    </div>
+                    <div class="text-end mt-3">
+                        <h5>Total: $<span id="cartTotal">0</span></h5>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="checkoutBtn">Checkout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Sample product data (same as index.html)
+        const products = [
+            {
+                id: 1,
+                name: "Wireless Headphones",
+                price: 99.99,
+                image: "/placeholder.svg?height=300&width=300",
+                description: "High-quality wireless headphones with noise cancellation",
+                details: {
+                    brand: "AudioTech",
+                    connectivity: "Bluetooth 5.0",
+                    batteryLife: "Up to 20 hours",
+                    features: [
+                        "Active Noise Cancellation",
+                        "Touch Controls",
+                        "Voice Assistant Support",
+                        "Quick Charging"
+                    ],
+                    specifications: {
+                        weight: "250g",
+                        color: "Black",
+                        warranty: "1 year"
+                    }
+                }
+            },
+            // ... (other products remain the same)
+        ];
+
+        // Shopping cart array (same as index.html)
+        let cart = [];
+
+        // Function to get URL parameters
+        function getUrlParameter(name) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(name);
+        }
+
+        // Function to render product details
+        function renderProductDetails() {
+            const productId = parseInt(getUrlParameter('id'));
+            const product = products.find(p => p.id === productId);
+
+            if (!product) {
+                $('#productDetails').html('<div class="col-12"><h2>Product not found</h2></div>');
+                return;
+            }
+
+            $('#productBreadcrumb').text(product.name);
+
+            $('#productDetails').html(`
+                <div class="col-md-6 mb-4">
+                    <img src="${product.image}" class="img-fluid product-image rounded" alt="${product.name}">
+                </div>
+                <div class="col-md-6">
+                    <h2 class="mb-3">${product.name}</h2>
+                    <h3 class="text-primary mb-4">$${product.price}</h3>
+                    <p class="mb-4">${product.description}</p>
+                    
+                    <div class="mb-4">
+                        <label for="quantity" class="form-label">Quantity:</label>
+                        <input type="number" class="form-control quantity-input" id="quantity" value="1" min="1">
+                    </div>
+                    
+                    <button class="btn btn-primary btn-lg mb-4" onclick="addToCartFromDetails(${product.id})">
+                        Add to Cart
+                    </button>
+
+                    <div class="mb-4">
+                        <h4>Features</h4>
+                        <ul>
+                            ${product.details.features.map(feature => `<li>${feature}</li>`).join('')}
+                        </ul>
+                    </div>
+
+                    <div class="mb-4">
+                        <h4>Specifications</h4>
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <td>Brand</td>
+                                    <td>${product.details.brand}</td>
+                                </tr>
+                                <tr>
+                                    <td>Connectivity</td>
+                                    <td>${product.details.connectivity}</td>
+                                </tr>
+                                <tr>
+                                    <td>Battery Life</td>
+                                    <td>${product.details.batteryLife}</td>
+                                </tr>
+                                <tr>
+                                    <td>Weight</td>
+                                    <td>${product.details.specifications.weight}</td>
+                                </tr>
+                                <tr>
+                                    <td>Color</td>
+                                    <td>${product.details.specifications.color}</td>
+                                </tr>
+                                <tr>
+                                    <td>Warranty</td>
+                                    <td>${product.details.specifications.warranty}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `);
+        }
+
+        // Function to render related products
+        function renderRelatedProducts() {
+            const currentProductId = parseInt(getUrlParameter('id'));
+            const relatedProducts = products.filter(p => p.id !== currentProductId).slice(0, 3);
+            
+            const container = $('#relatedProducts');
+            relatedProducts.forEach(product => {
+                container.append(`
+                    <div class="col-md-4">
+                        <div class="card h-100 related-product-card">
+                            <img src="${product.image}" class="card-img-top" alt="${product.name}">
+                            <div class="card-body">
+                                <h5 class="card-title">${product.name}</h5>
+                                <p class="card-text">${product.description}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="h5 mb-0">$${product.price}</span>
+                                    <a href="product-details.html?id=${product.id}" class="btn btn-outline-primary">
+                                        View Details
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `);
+            });
+        }
+
+        // Function to add item to cart from details page
+        function addToCartFromDetails(productId) {
+            const quantity = parseInt($('#quantity').val());
+            const product = products.find(p => p.id === productId);
+            const existingItem = cart.find(item => item.id === productId);
+
+            if (existingItem) {
+                existingItem.quantity += quantity;
+            } else {
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    quantity: quantity
+                });
+            }
+
+            updateCart();
+            
+            // Show feedback
+            alert(`Added ${quantity} ${quantity === 1 ? 'item' : 'items'} to cart`);
+        }
+
+        // Function to remove item from cart (same as index.html)
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            updateCart();
+        }
+
+        // Function to update cart display (same as index.html)
+        function updateCart() {
+            const cartItems = $('#cartItems');
+            const cartCount = $('#cartCount');
+            let total = 0;
+
+            cartItems.empty();
+            cart.forEach(item => {
+                total += item.price * item.quantity;
+                cartItems.append(`
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h6 class="mb-0">${item.name}</h6>
+                            <small class="text-muted">$${item.price} x ${item.quantity}</small>
+                        </div>
+                        <button class="btn btn-sm btn-danger" onclick="removeFromCart(${item.id})">Remove</button>
+                    </div>
+                `);
+            });
+
+            $('#cartTotal').text(total.toFixed(2));
+            cartCount.text(cart.reduce((sum, item) => sum + item.quantity, 0));
+        }
+
+        // Checkout function (same as index.html)
+        $('#checkoutBtn').click(function() {
+            if (cart.length === 0) {
+                alert('Your cart is empty!');
+                return;
+            }
+            alert('Thank you for your purchase!');
+            cart = [];
+            updateCart();
+            $('#cartModal').modal('hide');
+        });
+
+        // Initialize the page
+        $(document).ready(function() {
+            renderProductDetails();
+            renderRelatedProducts();
+            updateCart();
+        });
+    </script>
+</body>
+</html>
